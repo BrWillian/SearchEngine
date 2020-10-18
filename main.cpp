@@ -1,6 +1,10 @@
 #include <iostream>
 #include <string>
 #include <documento.h>
+#include <sstream>
+#include <fstream>
+#include <list>
+#include <tabelahash.h>
 
 #ifdef _WIN32
     #include <windows.h>
@@ -37,13 +41,66 @@ int main()
 
 
     gotoxy(20, 11);
-    cin>>text;
 
-    cout<<text<<endl;
+    string t;
+    vector<string> words;
+    getline(cin,t);
 
-    documento *obj = new documento;
+    istringstream iss(t);
+    string word;
+    while(iss >> word) {
+        words.push_back(word);
+    }
 
-    obj->ler_documento("entrada.txt");
 
 
+    vector<documento*> *documentos = new vector<documento*>;
+
+    std::fstream arquivo;
+    string n;
+    arquivo.open("entrada.txt");
+    if(arquivo.is_open())
+    {
+        while(arquivo >> n)
+        {
+            if(n.length() > 1)
+            {
+                documento *obj = new documento(n);
+                documentos->push_back(obj);
+            }
+        }
+    }
+
+    tabelahash *hash = new tabelahash;
+
+    for(auto it=documentos->begin(); it!=documentos->end(); ++it)
+    {
+        for(const auto& p: (*it)->palavras())
+        {
+            hash->Insere((*it), p);
+        }
+    }
+
+    gotoxy(0,20);
+
+    cout << "\033[2J\033[1;1H";
+    std::vector<std::vector<std::pair<documento*, std::string>>> resultado;
+
+    for(auto &p: words)
+    {
+        resultado.push_back(hash->busca(p));
+    }
+
+    int npos = 0;
+
+    for(auto it=resultado.begin(); it!=resultado.end(); ++it)
+    {
+        for(auto it2=it->begin(); it2!=it->end(); ++it2)
+        {
+            npos += 1;
+            std::cout<<npos<<". "<<it2->first->getNome()<<std::endl;
+            it2->first->get_ocorrencia(it2->second);
+            std::cout<<"-----------------------"<<std::endl;
+        }
+    }
 }
