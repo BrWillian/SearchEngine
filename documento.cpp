@@ -1,50 +1,78 @@
 #include "documento.h"
-#include <iostream>
 #include <fstream>
+#include <string>
 
-documento::documento()
+documento::documento(std::string caminho)
 {
+    nome_documento = caminho;
 
+    this->ler_documento();
 }
-void documento::ler_documento(string caminho)
+std::string documento::getNome()
 {
-    ifstream arquivo;
-    try{
-        arquivo.open(caminho);
-        if(arquivo.is_open())
-        {
-            string strtmp;
-            string palavra = "";
-            vector<string>str;
-            while(!arquivo.eof())
-            {
-               getline(arquivo, strtmp);
-
-               for(int i=0; i<strtmp.length(); i++)
-               {
-                   if(strtmp[i] != ' ')
-                   {
-                       palavra += strtmp[i];
-                       //cout<<palavra<<endl;
-                   }else
-                   {
-                       str.push_back(palavra);
-                       palavra = "";
-                   }
-               }
-            }
-
-            for(auto it = str.begin(); it != str.end(); ++it)
-            {
-                cout<<*it<<endl;
-            }
-
-        }else
-        {
-            throw "Erro ao abrir o arquivo!";
-        }
-    }catch (const char* error)
+    return nome_documento;
+}
+void documento::ler_documento()
+{
+    std::fstream arquivo;
+    std::string palavra;
+    int t;
+    arquivo.open(nome_documento);
+    if(arquivo.is_open())
     {
-        cerr << error << '\n' ;
+        while(arquivo >> palavra)
+        {
+            std::string palavratmp = "";
+            if(!(isdigit(palavra[0])))
+            {
+                for(auto& c: palavra)
+                {
+                    c = std::tolower(c);
+                    if (!(ispunct(c) && c != '-'))
+                    {
+                        palavratmp += c;
+                    }
+                }
+                if(palavratmp.length() > 2)
+                {
+                    if(busca_palavra(palavratmp, &t))
+                    {
+                        conjunto_palavra[t].second += 1;
+                        continue;
+                    }
+                    conjunto_palavra.push_back(std::make_pair(palavratmp, 1));
+                }
+            }
+        }
+    }
+}
+bool documento::busca_palavra(std::string palavra, int *pos)
+{
+    for(auto it = conjunto_palavra.begin(); it!=conjunto_palavra.end(); it++ ){
+        if(it->first == palavra)
+        {
+            *pos = it - conjunto_palavra.begin();
+            return true;
+        }
+    }
+    return false;
+}
+std::vector<std::string> documento::palavras()
+{
+    std::vector<std::string> tmp;
+
+    for(const auto& p: conjunto_palavra)
+    {
+        tmp.push_back(p.first);
+    }
+    return tmp;
+}
+void documento::get_ocorrencia(std::string palavra)
+{
+    for(auto it = conjunto_palavra.begin(); it!=conjunto_palavra.end(); it++ ){
+        if(it->first == palavra)
+        {
+            std::cout<<it->first<<" ocorreu: "<<it->second<<" vezes."<<std::endl;
+        }
     }
 }

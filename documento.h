@@ -2,18 +2,20 @@
 #define DOCUMENTO_H
 #include <vector>
 #include <string>
-
-using namespace std;
+#include <iostream>
 
 class documento
 {
 private:
-    int id_doc;
-    vector<pair<int, string>>palavras;
-
+    std::vector<std::pair<std::string, int>>conjunto_palavra;
+    std::string nome_documento;
+    void ler_documento();
 public:
-    void ler_documento(string caminho);
-    documento();
+    std::string getNome();
+    bool busca_palavra(std::string palavra, int *pos);
+    std::vector<std::string>palavras();
+    documento(std::string caminho);
+    void get_ocorrencia(std::string palavra);
 };
 
 #endif // DOCUMENTO_H
